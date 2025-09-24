@@ -166,7 +166,7 @@ for url in invidious_urls:
     print(f"[*] Checking {url}: ", end="")
     try:
         s = time()
-        res = req.get(f"{url}vi/dQw4w9WgXcQ/mqdefault.jpg", headers=headers, timeout=10)
+        res = req.get(f"{url}api/v1/videos/e-qWitCw9dU", headers=headers, timeout=10)
         
         if res.status_code == 200:
             secs = time() - s
