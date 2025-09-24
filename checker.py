@@ -1,6 +1,7 @@
 import requests as req
 from time import time
 import json
+import random
 
 invidious_urls = [
     "https://clover-pitch-position.glitch.me/",
@@ -161,10 +162,10 @@ print("---")
 for url in invidious_urls:
     try:
         s = time()
-        # Request a known video to test API response
+        # APIリクエストの成功をテストするために、既知の動画IDを使用します。
         res = req.get(f"{url}api/v1/videos/e-qWitCw9dU", headers=headers, timeout=10)
         
-        # Check if the status code is 200 (OK)
+        # ステータスコードが200（OK）であることを確認します。
         if res.status_code == 200:
             secs = time() - s
             secs_str = f"{secs:.4f}"
@@ -172,31 +173,32 @@ for url in invidious_urls:
                 "url": url,
                 "time": secs_str
             })
-            # Log successful responses
-            print(f"✅ Successful: {url} | Took {secs_str}s")
+            # 成功したレスポンスのみをログに記録します。
+            print(f"✅ 成功: {url} | 所要時間 {secs_str}s")
 
-            # Update the fastest instance if a new one is found
+            # 新しい最速のインスタンスが見つかった場合、更新します。
             if best["time"] > secs:
                 best["name"] = url
                 best["time"] = secs
-
+        # その他の場合は何もしません。
+        
     except req.exceptions.RequestException:
-        # Silently fail on timeout or other request errors
+        # タイムアウトやその他のリクエストエラーは、サイレントに処理します。
         pass
     except Exception:
-        # Silently fail on other unexpected errors
+        # その他の予期せぬエラーも、サイレントに処理します。
         pass
 
 print("\n---")
 if not successful_instances:
-    print("❌ All instances failed to respond successfully.")
+    print("❌ すべてのインスタンスが正常に応答しませんでした。")
 else:
-    print("✅ Check completed. The following instances were successful:")
+    print("✅ チェックが完了しました。以下のインスタンスが正常でした：")
     
-    # Sort and display successful instances by response time
+    # 応答時間で成功したインスタンスをソートして表示します。
     sorted_instances = sorted(successful_instances, key=lambda x: float(x['time']))
     for inst in sorted_instances:
         print(f"  - {inst['url']}: {inst['time']}s")
 
-    print("\n🚀 The fastest instance found is:")
+    print("\n🚀 見つかった最速のインスタンスは次のとおりです：")
     print(f"  - {best['name']} ({best['time']:.4f}s)")
