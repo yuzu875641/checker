@@ -1,7 +1,6 @@
 import requests as req
 from time import time
 import json
-import random
 
 invidious_urls = [
     "https://clover-pitch-position.glitch.me/",
@@ -157,17 +156,15 @@ best = {
 }
 
 print("[*] Starting Invidious instance check...")
+print("---")
 
 for url in invidious_urls:
-    if not url.startswith("http"):
-        print(f"[-] Skipping {url}: Invalid protocol")
-        continue
-
-    print(f"[*] Checking {url}: ", end="")
     try:
         s = time()
+        # Request a known video to test API response
         res = req.get(f"{url}api/v1/videos/e-qWitCw9dU", headers=headers, timeout=10)
         
+        # Check if the status code is 200 (OK)
         if res.status_code == 200:
             secs = time() - s
             secs_str = f"{secs:.4f}"
@@ -175,30 +172,31 @@ for url in invidious_urls:
                 "url": url,
                 "time": secs_str
             })
-            print(f"Took {secs_str}s")
+            # Log successful responses
+            print(f"✅ Successful: {url} | Took {secs_str}s")
 
+            # Update the fastest instance if a new one is found
             if best["time"] > secs:
                 best["name"] = url
                 best["time"] = secs
-        else:
-            print(f"Bad response ({res.status_code})")
 
-    except req.exceptions.Timeout:
-        print("Timeout")
-    except req.exceptions.RequestException as e:
-        print(f"Failed ({e})")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+    except req.exceptions.RequestException:
+        # Silently fail on timeout or other request errors
+        pass
+    except Exception:
+        # Silently fail on other unexpected errors
+        pass
 
 print("\n---")
 if not successful_instances:
-    print("[-] All instances failed to respond.")
+    print("❌ All instances failed to respond successfully.")
 else:
-    print("[+] Check completed. The following instances were successful:")
-    # 応答時間でソートして表示
+    print("✅ Check completed. The following instances were successful:")
+    
+    # Sort and display successful instances by response time
     sorted_instances = sorted(successful_instances, key=lambda x: float(x['time']))
     for inst in sorted_instances:
         print(f"  - {inst['url']}: {inst['time']}s")
 
-    print("\n[+] The fastest instance found is:")
+    print("\n🚀 The fastest instance found is:")
     print(f"  - {best['name']} ({best['time']:.4f}s)")
